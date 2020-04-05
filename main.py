@@ -21,6 +21,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.register_blueprint(users_api)
 app.register_blueprint(datasets_api)
+app.register_blueprint(jobs_api)
 
 
 @app.errorhandler(http_client.INTERNAL_SERVER_ERROR)

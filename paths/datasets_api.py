@@ -13,45 +13,49 @@ datasets_api = Blueprint("datasets_api", __name__)
 
 @datasets_api.route("/datasets", methods=["POST"])
 def add_dataset():
-    link = request.get_json().get("link", "")
-    size = request.get_json().get("size", "")
-    uploaded_by = request.get_json().get("uid", "")
-    uploaded_at = int(time.time())
+    dataset_type = request.get_json().get("type", "")
+    uploaded_by = request.get_json().get("uploaded_by", "")
 
-    print(link, size, uploaded_by)
+    user_snapshot = db.reference('/users/'+uploaded_by).get()
+    if uploaded_by == "" or not user_snapshot.val():
+        return "No user information provided", 400
 
-    if link == "":
-        return "No link provided", 400
-    if size == "":
-        return "No size provided", 400
-    if uploaded_by == "":
-        return "No uid provided", 400
+    if dataset_type == "image_classification":
+        child_datasets = request.get_json().get("child_datasets", {})
 
-    csv_loader = requests.get(link, stream=True)
+        if child_datasets == {}:
+            return "No child datasets provided", 400
 
-    features = []
+        dataset_ref = db.reference('/datasets').push()
+        dataset_ref.set({
+            'uploaded_by': uploaded_by,
+            'child_datasets': child_datasets,
+            'dataset_type': dataset_type
+        })
 
-    for line in csv_loader.iter_lines():
-        if line:
-            decoded_line = line.decode('utf-8')
-            features = decoded_line.split(',')
-            break
+        user_ref = db.reference('/users/{}/datasets/{}'.format(uploaded_by, dataset_ref.key)).set('true')
+        return "Datasets stored", 200
 
-    dataset_ref = db.reference('/datasets').push()
-    dataset_ref.set({
-        'features': features,
-        'link': link,
-        'size': size,
-        'uploaded_by': uploaded_by,
-        'uploaded_at': uploaded_at
-    })
+    else if dataset_type == "structured_prediction":
+        # csv_loader = requests.get(link, stream=True)
 
-    user_ref = db.reference('/users/{}/datasets/{}'.format(uploaded_by, dataset_ref.key)).set(link)
+        # features = []
 
-    return jsonify({"features": features, "dataset_id": dataset_ref.key}), 200
+        # for line in csv_loader.iter_lines():
+        #     if line:
+        #         decoded_line = line.decode('utf-8')
+        #         features = decoded_line.split(',')
+        #         break
+        pass
 
-    
-    
+    else if dataset_type == 'structured_classification':
+        pass
+
+    else if dataset_type == "custom":
+        pass
+
+    else:
+        return "No such dataset_type", 400
 
 
 @datasets_api.route("/datasets/<datasetid>", methods=["GET"])

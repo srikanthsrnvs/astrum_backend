@@ -2,16 +2,18 @@ import base64
 import json
 import logging
 
-from flask import Flask, jsonify, request, blueprints
+import firebase_admin
+from firebase_admin import *
+from flask import Flask, blueprints, jsonify, request
 from flask_cors import CORS
 from six.moves import http_client
-from firebase_admin import *
-from paths.users_api import users_api
-from paths.jobs_api import jobs_api
-from paths.datasets_api import datasets_api
-import firebase_admin
 
-cred = credentials.Certificate("./astrumdashboard-firebase-adminsdk-a9922-baf7120ba2.json")
+from paths.datasets_api import datasets_api
+from paths.jobs_api import jobs_api
+from paths.users_api import users_api
+
+cred = credentials.Certificate(
+    "./astrumdashboard-firebase-adminsdk-a9922-baf7120ba2.json")
 
 firebase = firebase_admin.initialize_app(cred, {
     "databaseURL": "https://astrumdashboard.firebaseio.com/"

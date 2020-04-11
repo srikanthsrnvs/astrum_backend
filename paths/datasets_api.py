@@ -21,23 +21,17 @@ def add_dataset():
         print("No such user exists "+uploaded_by)
         return "No user information provided", 400
 
-    if dataset_type == "image_classification":
-        child_datasets = request.get_json().get("child_datasets", {})
-
-        if child_datasets == {}:
-            print("Bad child datasets "+child_datasets)
-            return "No child datasets provided", 400
-
+    if dataset_type == "image_classification" or dataset_type == 'object_detection' or dataset_type == 'object_localization':
+        file_upload = request.get_json().get("file", {})
         dataset_ref = db.reference('/datasets').push()
         dataset_ref.set({
             'uploaded_by': uploaded_by,
-            'child_datasets': child_datasets,
+            'file': file_upload,
             'dataset_type': dataset_type
         })
-
         user_ref = db.reference(
             '/users/{}/datasets/{}'.format(uploaded_by, dataset_ref.key)).set('true')
-        return jsonify({'dataset_id': dataset_ref.key}), 200
+        return jsonify({'dataset_id': dataset_ref.key, 'status': 'success'}), 200
 
     elif dataset_type == "structured_prediction":
         # csv_loader = requests.get(link, stream=True)

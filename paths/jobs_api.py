@@ -65,8 +65,10 @@ def update_job(job_id):
         logs = request.get_json().get('logs', '')
         tb_logs = request.get_json().get('tb_logs', '')
         label_map = request.get_json().get('label_map', '')
+        serving_model = request.get_json().get('serving_model', '')
         job_ref = db.reference('/jobs/'+job_id).update(
-            {
+            {   
+                'serving_model': serving_model,
                 'model': model,
                 'logs': logs,
                 'tb_logs': tb_logs,

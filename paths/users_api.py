@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-
+import stripe
 from firebase_admin import auth, db, exceptions
 from flask import Blueprint, jsonify, request
 
@@ -13,7 +13,7 @@ def sign_up():
     email = request.get_json().get('email', '')
     password = request.get_json().get('password', '')
     display_name = request.get_json().get('display_name', '')
-
+    
     try:
         user = auth.create_user(
             display_name=display_name,

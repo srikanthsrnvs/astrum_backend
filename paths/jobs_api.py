@@ -66,11 +66,14 @@ def update_job(job_id):
         tb_logs = request.get_json().get('tb_logs', '')
         label_map = request.get_json().get('label_map', '')
         serving_model = request.get_json().get('serving_model', '')
+        stats = request.get_json().get('stats', '')
+
         job_ref = db.reference('/jobs/'+job_id).update(
             {   
                 'serving_model': serving_model,
                 'model': model,
                 'logs': logs,
+                'model_stats': stats
                 'tb_logs': tb_logs,
                 'label_map': label_map,
                 'status': status,
@@ -82,4 +85,11 @@ def update_job(job_id):
 
     # Means that building the prediction endpoint on compute engine is complete
     if status == 3:
-        pass
+        prediction_url = request.get_json().get('prediction_url', '')
+        job_ref = db.reference('/jobs/'+job_id).update(
+            {   
+                'prediction_url': prediction_url,
+                'status': status
+            }
+        )
+        return jsonify({'status': 'success'}), 200

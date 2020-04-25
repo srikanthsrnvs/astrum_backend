@@ -1,0 +1,3 @@
+dispatch:
+  - url: "api.astrum.ai/*"
+    service: api
